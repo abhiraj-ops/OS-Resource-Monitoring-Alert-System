@@ -1,61 +1,89 @@
-
 # 🖥️ OS Resource Monitoring & Alert System
 
+### Real-Time Linux System Monitoring · Performance Analytics · Intelligent Alerts
+
 <p align="center">
-  <b>Real-Time Linux System Monitoring, Performance Analytics & Intelligent Alerts</b>
+  <img src="https://img.shields.io/badge/Platform-Ubuntu%20Linux-orange?logo=ubuntu" />
+  <img src="https://img.shields.io/badge/Language-Python%203-blue?logo=python" />
+  <img src="https://img.shields.io/badge/Frontend-React-61DAFB?logo=react" />
+  <img src="https://img.shields.io/badge/Database-PostgreSQL-4169E1?logo=postgresql" />
+  <img src="https://img.shields.io/badge/Backend-Supabase-3FCF8E?logo=supabase" />
+  <img src="https://img.shields.io/badge/Status-In%20Development-yellow" />
 </p>
 
 <p align="center">
-  A centralized monitoring platform that tracks Ubuntu system resources, detects abnormal utilization, and generates real-time performance alerts.
+  <a href="https://github.com/abhiraj-ops/OS-Resource-Monitoring-Alert-System/stargazers">
+    <img src="https://img.shields.io/github/stars/abhiraj-ops/OS-Resource-Monitoring-Alert-System?style=social" />
+  </a>
+  <a href="https://github.com/abhiraj-ops/OS-Resource-Monitoring-Alert-System/network/members">
+    <img src="https://img.shields.io/github/forks/abhiraj-ops/OS-Resource-Monitoring-Alert-System?style=social" />
+  </a>
+  <a href="https://github.com/abhiraj-ops/OS-Resource-Monitoring-Alert-System/commits/main">
+    <img src="https://img.shields.io/github/last-commit/abhiraj-ops/OS-Resource-Monitoring-Alert-System" />
+  </a>
+  <img src="https://img.shields.io/github/license/abhiraj-ops/OS-Resource-Monitoring-Alert-System" />
 </p>
 
 ---
 
 ## 📌 Overview
 
-The **OS Resource Monitoring & Alert System** is a Linux-based system monitoring application designed to track, analyze, and visualize operating system resource utilization in real time.
+**OS Resource Monitoring & Alert System** is a Linux-based system monitoring application designed to monitor, analyze, and visualize operating system resource utilization.
 
-The project uses a Python-based monitoring agent running on Ubuntu Linux to collect system performance metrics, including CPU usage, memory utilization, disk activity, network traffic, and running processes.
+The project uses a Python-based monitoring agent running on Ubuntu Linux to collect system performance information such as:
 
-Collected metrics are securely transmitted to Supabase for database storage and real-time synchronization. A React-based web dashboard displays system performance, resource utilization trends, process information, and alerts.
+- CPU utilization
+- RAM and memory usage
+- Disk storage utilization
+- Network traffic
+- Running processes
+- System uptime and load average
 
-The platform aims to help users identify resource bottlenecks, detect abnormal system behavior, and understand operating system performance through an interactive monitoring interface.
+The collected information is intended to be stored in Supabase and displayed through a modern React dashboard.
+
+The system also includes a configurable alert engine to identify abnormal resource consumption and highlight potential performance bottlenecks.
+
+**Our goal:** Build an interactive monitoring platform that makes operating system performance easier to understand, analyze, and manage.
 
 ## 🎯 Project Objectives
 
-- Monitor Ubuntu system resources in real time.
-- Collect CPU, RAM, disk, and network statistics.
+- Monitor Linux system resources in real time.
+- Collect and analyze CPU, RAM, disk, and network statistics.
 - Track active processes and their resource consumption.
-- Detect resource utilization beyond configured thresholds.
-- Generate WARNING and CRITICAL alerts.
+- Identify unusually high resource utilization.
+- Generate WARNING and CRITICAL alerts using configurable thresholds.
 - Store historical system performance data.
-- Visualize system performance through interactive charts.
-- Provide secure authentication and user-specific monitoring data.
+- Display resource utilization through interactive charts.
+- Provide a secure and user-friendly monitoring dashboard.
 
 ## ✨ Key Features
 
-### 1. Real-Time System Monitoring
-- CPU utilization and individual core usage.
-- RAM usage, available memory, and swap utilization.
-- Disk space and partition monitoring.
-- Network upload and download speeds.
+### 1. 📊 Real-Time System Monitoring
+
+- CPU utilization and core information.
+- RAM usage and available memory.
+- Disk storage and partition utilization.
+- Network upload and download statistics.
 - System uptime and load average.
 
-### 2. Process Monitoring
+### 2. ⚙️ Process Monitoring
+
 - Display currently running processes.
 - Process ID (PID) identification.
-- Per-process CPU utilization.
-- Per-process memory consumption.
+- Individual process CPU consumption.
+- Individual process memory consumption.
 - Identify resource-intensive processes.
 
-### 3. Intelligent Alert Engine
+### 3. 🚨 Intelligent Alert Engine
+
 - Configurable CPU usage thresholds.
 - Configurable memory thresholds.
-- Disk utilization warnings.
-- WARNING and CRITICAL severity levels.
+- Disk utilization monitoring.
+- WARNING and CRITICAL alert levels.
 - Alert history and acknowledgement.
 
-### 4. Interactive Dashboard
+### 4. 📈 Interactive Dashboard
+
 - Live CPU, RAM, disk, and network cards.
 - Dynamic resource utilization charts.
 - System health indicators.
@@ -63,22 +91,27 @@ The platform aims to help users identify resource bottlenecks, detect abnormal s
 - Recent alerts and notifications.
 - Historical performance analytics.
 
-### 5. Backend & Authentication
+### 5. 🔐 Backend & Authentication
+
 - Supabase Authentication.
 - PostgreSQL database.
 - Supabase Realtime subscriptions.
 - Row Level Security (RLS).
 - Secure storage of system metrics and alerts.
 
-### 6. Advanced Features
+### 6. 🚀 Advanced Enhancements
+
 - Resource utilization trend analysis.
-- Anomaly detection as an optional ML enhancement.
+- Anomaly detection as an optional machine-learning enhancement.
 - Performance bottleneck identification.
 - Automated recovery recommendations.
+- Future support for monitoring multiple Linux machines.
+
+---
 
 ## 🛠️ Technology Stack
 
-| Layer | Technology |
+| Component | Technology |
 |---|---|
 | Operating System | Ubuntu Linux |
 | Programming Language | Python 3 |
@@ -92,54 +125,56 @@ The platform aims to help users identify resource bottlenecks, detect abnormal s
 | Live Synchronization | Supabase Realtime |
 | Version Control | Git & GitHub |
 
+---
+
 ## 🏗️ System Architecture
 
 ```text
-              UBUNTU LINUX
-                   |
-                   v
-          PYTHON MONITORING AGENT
-                   |
-          +--------+--------+
-          |        |        |
-          v        v        v
-         CPU      RAM     DISK
-          |        |        |
-          +--------+--------+
-                   |
-                   v
-             NETWORK &
-              PROCESSES
-                   |
-                   v
-          METRICS COLLECTION
-                   |
-                   v
-           ALERT THRESHOLD
-               ENGINE
-                   |
-             +-----+-----+
-             |           |
-             v           v
-          SUPABASE    ALERTS
-          DATABASE
-             |
-             v
-       SUPABASE REALTIME
-             |
-             v
-        REACT DASHBOARD
-             |
-       +-----+------+
-       |            |
-       v            v
-    ANALYTICS     ALERT UI
-       |
-       v
-  PERFORMANCE HISTORY
+                  UBUNTU LINUX
+                       |
+                       v
+              PYTHON MONITORING AGENT
+                       |
+          +------------+------------+
+          |            |            |
+          v            v            v
+         CPU          RAM          DISK
+          |            |            |
+          +------------+------------+
+                       |
+                       v
+              NETWORK & PROCESSES
+                       |
+                       v
+                METRICS COLLECTION
+                       |
+                       v
+              ALERT THRESHOLD ENGINE
+                       |
+                +------+------+
+                |             |
+                v             v
+             SUPABASE       ALERTS
+             DATABASE
+                |
+                v
+          SUPABASE REALTIME
+                |
+                v
+           REACT DASHBOARD
+                |
+          +-----+------+
+          |            |
+          v            v
+       ANALYTICS    ALERT UI
+          |
+          v
+     PERFORMANCE HISTORY
 ```
 
 ## 📂 Project Structure
+
+The following is the planned modular project structure. Files will be added as the corresponding modules are developed.
 
 ```text
 OS-Resource-Monitoring-Alert-System/
@@ -191,18 +226,22 @@ OS-Resource-Monitoring-Alert-System/
 └── README.md
 ```
 
+---
+
 ## ⚙️ Installation & Setup
 
 ### Prerequisites
 
-- Ubuntu Linux 22.04 or later.
-- Python 3.10 or later.
-- Node.js 20 or later.
-- npm.
-- Git.
-- Supabase account.
+Make sure the following tools are installed:
 
-### 1. Clone Repository
+- Ubuntu Linux 22.04 or later
+- Python 3.10 or later
+- Node.js 20 or later
+- npm
+- Git
+- Supabase account
+
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/abhiraj-ops/OS-Resource-Monitoring-Alert-System.git
@@ -218,7 +257,7 @@ sudo apt update
 sudo apt install python3 python3-pip python3-venv git -y
 ```
 
-### 3. Setup Monitoring Agent
+### 3. Setup Python Monitoring Agent
 
 ```bash
 cd monitoring-agent
@@ -246,29 +285,32 @@ cd frontend
 npm install
 ```
 
-Create `.env`:
+Create a `.env` file inside the frontend directory:
 
 ```env
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_publishable_key
 ```
 
-Start development server:
+Start the frontend development server:
 
 ```bash
 npm run dev
 ```
 
-### 5. Supabase Configuration
+### 5. Configure Supabase
 
-1. Create a Supabase project.
-2. Create the PostgreSQL database tables using `supabase/schema.sql`.
-3. Configure Supabase Authentication.
-4. Enable Row Level Security.
-5. Configure Realtime for the required tables.
-6. Configure environment variables securely for the monitoring agent.
+1. Create a new Supabase project.
+2. Configure the PostgreSQL database.
+3. Create the required tables using `supabase/schema.sql`.
+4. Configure Supabase Authentication.
+5. Enable Row Level Security (RLS).
+6. Configure Realtime for the required tables.
+7. Add the required environment variables.
 
-**Security:** Never expose the Supabase service-role key in frontend code or commit secret credentials to GitHub.
+**Security Note:** Never expose the Supabase service-role key in frontend code or commit secret credentials to GitHub.
+
+---
 
 ## 📊 System Metrics
 
@@ -277,60 +319,128 @@ npm run dev
 | CPU | Overall and core-wise utilization |
 | Memory | Used, free, and available RAM |
 | Swap | Swap memory utilization |
-| Disk | Partition storage usage |
-| Network | Upload and download throughput |
+| Disk | Partition storage utilization |
+| Network | Upload and download traffic |
 | Processes | PID, CPU, and memory consumption |
-| Uptime | System running duration |
+| Uptime | Total system running duration |
 | Load Average | System workload over time |
 
 ## 🚨 Alert Classification
 
-| Level | Description |
+| Alert Level | Description |
 |---|---|
-| INFO | General system information |
-| WARNING | Resource utilization approaching threshold |
-| CRITICAL | Resource utilization exceeding critical threshold |
+| 🟢 INFO | General system information |
+| 🟡 WARNING | Resource utilization approaching a configured threshold |
+| 🔴 CRITICAL | Resource utilization exceeding a critical threshold |
 
-## 👥 Team Contributions
+Alert thresholds will be configurable so that users can adjust monitoring according to their system requirements.
 
-Developed collaboratively by three team members.
+---
 
-| Member | Responsibility |
-|---|---|
-| Member 1 | React Frontend & Dashboard |
-| Member 2 | Python Monitoring Agent & Linux Integration |
-| Member 3 | Supabase Backend & Database |
+## 🧠 Operating System Concepts
 
-All team members contribute to testing, integration, documentation, and final deployment.
+This project demonstrates practical applications of important Operating System concepts:
 
-## 🎓 Operating System Concepts
+- **Process Management:** Monitoring active processes and their resource consumption.
+- **CPU Management:** Understanding CPU utilization and system workload.
+- **Memory Management:** Tracking RAM and swap utilization.
+- **Disk Management:** Monitoring storage capacity and usage.
+- **Resource Allocation:** Understanding how system resources are consumed.
+- **Performance Monitoring:** Analyzing system performance over time.
+- **Process Scheduling Concepts:** Observing process activity and CPU consumption.
 
-This project demonstrates practical applications of:
+---
 
-- Process Management
-- CPU Utilization
-- Memory Management
-- Disk Management
-- Resource Monitoring
-- System Performance Analysis
-- Process Scheduling Concepts
-- Resource Allocation
+## 👥 Development Team
 
-## 🚀 Future Enhancements
+This project is collaboratively developed by three team members, with clearly defined responsibilities for each development area.
+
+| Member | Role | Responsibilities | GitHub |
+|---|---|---|---|
+| **Abhiraj Chauhan** | Project Lead & OS Monitoring Developer | Ubuntu monitoring, Python, psutil, CPU/RAM/Disk/Network collectors, process monitoring and integration | [@abhiraj-ops](https://github.com/abhiraj-ops) |
+| **Divy** | Frontend Developer | React, Vite, Tailwind CSS, dashboard, charts, process table and alert UI | [@divymsid](https://github.com/divymsid) |
+| **Kaashvi** | Backend & Database Developer | Supabase, PostgreSQL, authentication, RLS, database schema and realtime integration | [@kaashvi5](https://github.com/kaashvi5) |
+
+**Team Collaboration:** All team members contribute to testing, documentation, code reviews, debugging, and final integration.
+
+---
+
+## 🤝 Contribution Guidelines
+
+We follow a collaborative Git workflow to maintain clean and organized development.
+
+1. Clone the repository.
+2. Create a separate feature branch.
+3. Work on your assigned module.
+4. Commit changes with meaningful messages.
+5. Push your branch to GitHub.
+6. Create a Pull Request for review.
+7. Merge changes into the main branch after review.
+
+Suggested branches:
+
+```text
+main
+│
+├── feature/linux-monitoring
+├── feature/frontend-dashboard
+└── feature/supabase-backend
+```
+
+Example:
+
+```bash
+git checkout -b feature/your-module
+
+git add .
+
+git commit -m "Add your feature description"
+
+git push origin feature/your-module
+```
+
+---
+
+## 🔮 Future Enhancements
 
 - Machine learning-based anomaly detection.
 - Predictive resource utilization.
 - Multi-machine monitoring.
-- Email notifications.
+- Email and desktop notifications.
 - Automated process management with user approval.
-- Advanced performance reporting.
+- Advanced performance reports.
+- Historical resource comparison.
+- Configurable monitoring intervals.
+
+---
+
+## 📸 Screenshots
+
+Screenshots of the monitoring agent, dashboard, analytics, and alert interface will be added here as development progresses.
+
+```text
+docs/
+└── screenshots/
+    ├── dashboard.png
+    ├── cpu-monitoring.png
+    ├── process-monitoring.png
+    └── alerts.png
+```
+
+---
 
 ## 📜 License
 
-This project is licensed under the MIT License.
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
 
 ---
 
 <p align="center">
-  <b>Built with Python, React, Ubuntu Linux & Supabase.</b>
+  <b>Built with ❤️ using Python, React, Ubuntu Linux & Supabase.</b>
+  <br/>
+  <i>Monitoring systems. Understanding performance. Detecting problems.</i>
+</p>
+
+<p align="center">
+  ⭐ If you find this project interesting, consider giving the repository a star!
 </p>
