@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { Menu, LogOut, ShieldCheck } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Menu, LogOut } from "lucide-react";
 import MobileNav from "./MobileNav.jsx";
 
 export default function Navbar({ userEmail, realtimeStatus, onSignOut }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
-  const live = realtimeStatus === "live";
+  const live = realtimeStatus === "online";
 
   const handleSignOut = () => {
     onSignOut();
@@ -33,7 +33,7 @@ export default function Navbar({ userEmail, realtimeStatus, onSignOut }) {
             className={`whitespace-nowrap rounded-full border px-3.5 py-2.5 text-xs ${live ? "border-[#245047] bg-[#112b2a] text-[#76e8c4]" : "border-[#58482a] bg-[#282316] text-[#eacb82]"}`}
           >
             <span className={`status-dot ${live ? "" : "amber"}`} />
-            {realtimeStatus === "demo" ? "Demo data" : live ? "Realtime connected" : realtimeStatus === "waiting" ? "Waiting for system" : realtimeStatus === "offline" ? "Realtime unavailable" : "Connecting to Realtime"}
+            {live ? "System Online" : live === false && realtimeStatus === "offline" ? "System Offline" : "Connecting…"}
           </span>
           {userEmail && (
             <span className="max-w-44 truncate text-xs text-[#9eacc3]" title={userEmail}>

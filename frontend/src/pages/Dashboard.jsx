@@ -11,27 +11,16 @@ import useDashboardData from "../hooks/useDashboardData.js";
 import { AnnounceToScreenReader } from "../components/AnnounceToScreenReader.jsx";
 
 const demoMetrics = [
-  { name: "CPU", value: "42%", detail: "Demo data" },
-  { name: "RAM", value: "6.4 GB", detail: "of 16 GB · Demo data" },
-  { name: "Disk", value: "58%", detail: "Demo data" },
-  { name: "Network", value: "24 MB/s", detail: "Demo data" },
+  { name: "CPU", value: "0%", detail: "No data" },
+  { name: "RAM", value: "0 GB", detail: "No data" },
+  { name: "Disk", value: "0%", detail: "No data" },
+  { name: "Network", value: "0 MB/s", detail: "No data" },
 ];
 const demoChartData = [
-  { time: "10:00", cpu: 32, ram: 48 }, { time: "10:05", cpu: 45, ram: 51 },
-  { time: "10:10", cpu: 38, ram: 49 }, { time: "10:15", cpu: 62, ram: 56 },
-  { time: "10:20", cpu: 42, ram: 53 }, { time: "10:25", cpu: 70, ram: 61 },
-  { time: "10:30", cpu: 55, ram: 58 },
+  { time: "00:00", cpu: 0, ram: 0 },
 ];
-const demoProcesses = [
-  { id: "demo-1", pid: 1840, process_name: "chrome.exe", cpu_percent: 12.4, memory_bytes: 1200000000 },
-  { id: "demo-2", pid: 2316, process_name: "Code.exe", cpu_percent: 8.1, memory_bytes: 864000000 },
-  { id: "demo-3", pid: 992, process_name: "System", cpu_percent: 3.2, memory_bytes: 420000000 },
-  { id: "demo-4", pid: 3148, process_name: "explorer.exe", cpu_percent: 1.7, memory_bytes: 188000000 },
-];
-const demoAlerts = [
-  { id: "demo-alert-1", alert_type: "CPU usage elevated", severity: "warning", message: "Demo alert · CPU reached 78%", status: "active", triggered_at: null },
-  { id: "demo-alert-2", alert_type: "System scan completed", severity: "info", message: "Demo alert · No issues found", status: "resolved", triggered_at: null },
-];
+const demoProcesses = [];
+const demoAlerts = [];
 
 function formatBytes(bytes) {
   if (bytes == null) return "—";
@@ -46,8 +35,7 @@ function percent(part, total) {
   return Math.max(0, Math.min(100, Number(part) / Number(total) * 100));
 }
 
-function buildMetrics(metrics, demoMode) {
-  if (demoMode) return demoMetrics;
+function buildMetrics(metrics) {
   const latest = metrics[0];
   const previous = metrics[1];
   const ramPercent = percent(latest?.memory_used_bytes, latest?.memory_total_bytes);
@@ -68,8 +56,7 @@ function buildMetrics(metrics, demoMode) {
   ];
 }
 
-function latestProcesses(processes, demoMode) {
-  if (demoMode) return demoProcesses;
+function latestProcesses(processes) {
   const seen = new Set();
   return processes.filter(process => {
     if (seen.has(process.pid)) return false;
@@ -78,8 +65,7 @@ function latestProcesses(processes, demoMode) {
   });
 }
 
-function chartPoints(metrics, demoMode) {
-  if (demoMode) return demoChartData;
+function chartPoints(metrics) {
   return [...metrics].reverse().map(metric => ({
     time: new Date(metric.collected_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     cpu: metric.cpu_percent == null ? null : Number(metric.cpu_percent),
@@ -87,68 +73,53 @@ function chartPoints(metrics, demoMode) {
   }));
 }
 
-export default function Dashboard({ supabase = null, session = null, demoMode = false }) {
+export default function Dashboard({ supabase = null, session = null }) {
   const data = useDashboardData(supabase, session?.user?.id);
-  const metrics = buildMetrics(data.metrics, demoMode);
-  const processes = latestProcesses(data.processes, demoMode);
-  const alerts = demoMode ? demoAlerts : data.alerts;
-  const chartData = chartPoints(data.metrics, demoMode);
+  const metrics = buildMetrics(data.metrics);
+  const processes = latestProcesses(data.processes);
+  const alerts = data.alerts;
+  const chartData = chartPoints(data.metrics);
   const selectedSystem = data.systems.find(system => system.id === data.selectedSystemId);
 
   async function handleSignOut() {
     await supabase?.auth.signOut();
   }
 
+  const hasData = data.systems.length > 0;
+
   return (
     <main className="flex min-h-screen max-[720px]:block">
       <AnnounceToScreenReader announcement={data.error || (data.loading ? "Loading data…" : null)} />
       <Sidebar />
       <section className="mx-auto w-full max-w-[1440px] px-[clamp(20px,4vw,58px)] pb-[26px] pt-9 max-[720px]:px-[15px] max-[720px]:py-[23px]">
-        <Navbar userEmail={session?.user?.email} realtimeStatus={demoMode ? "demo" : data.realtimeStatus} onSignOut={session ? handleSignOut : null} />
+        <Navbar userEmail={session?.user?.email} realtimeStatus={data.realtimeStatus} onSignOut={session ? handleSignOut : null} />
 
-        {!demoMode && selectedSystem && (
+        {!hasData && selectedSystem === "" && (
           <div className="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-[#25334b] bg-[#111b2c] px-4 py-3">
-            <label htmlFor="system-select" className="text-xs font-semibold text-[#9eacc3]">Monitored system</label>
-            <select
-              id="system-select"
-              value={data.selectedSystemId}
-              onChange={(event) => data.setSelectedSystemId(event.target.value)}
-              className="min-w-56 rounded-md border border-[#30405b] bg-[#0c1422] px-3 py-2 text-sm text-white outline-none focus:border-[#65e6bd]"
-              aria-label="Select monitored system"
-            >
-              {data.systems.map(system => (
-                <option key={system.id} value={system.id}>{system.display_name || system.hostname}</option>
-              ))}
-            </select>
-            <span className="text-xs text-[#8d9ab1]">{selectedSystem.operating_system || "Operating system unknown"} · {selectedSystem.status}</span>
+            <span className="status-dot amber" /> No systems connected. Install the monitoring agent to begin.
           </div>
         )}
 
-        {demoMode ? (
-          <div className="mb-[18px] flex flex-wrap items-center gap-2.5 rounded-[10px] border border-[#58482a] bg-[#282316] px-4 py-3 text-[13px] text-[#eacb82] max-[520px]:flex-col max-[520px]:items-start">
-            <strong className="text-[#ffd77e]">Demo preview</strong>
-            <span>Showing sample metrics. Live system data is not connected.</span>
-          </div>
-        ) : data.loading && (
+        {!hasData && selectedSystem !== "" && (
           <div className="mb-4 rounded-lg border border-[#25334b] bg-[#111b2c] p-4">
             <LoadingSpinner message="Loading data from Supabase…" />
           </div>
         )}
 
-        {!demoMode && data.error && (
-          <ErrorMessage message={data.error} onDismiss={() => {}} />
+        {data.error && (
+          <ErrorMessage message={data.error} onDismiss={() => data.setSelectedSystemId("")} />
         )}
 
-        {!demoMode && !data.loading && !data.error && !data.systems.length && (
+        {!hasData && !data.loading && !data.error && (
           <EmptyState
             title="No systems linked yet"
-            message="No monitored systems are connected to this account. Register a system to begin monitoring."
-            actionLabel="Register system"
+            message="No monitored systems are connected to this account. Install the Python monitoring agent on your Ubuntu machine and register it to begin monitoring CPU, memory, disk, and network usage."
+            actionLabel="View Setup Guide"
             icon="🖥"
           />
         )}
 
-        {!demoMode && !data.loading && !data.error && data.systems.length && (
+        {hasData && (
           <>
             <section className="mb-4 grid grid-cols-4 gap-3.5 max-[1000px]:grid-cols-2 max-[380px]:grid-cols-1" aria-label="System metrics">
               {metrics.map(metric => (
@@ -157,26 +128,26 @@ export default function Dashboard({ supabase = null, session = null, demoMode = 
             </section>
 
             <section className="mb-4 grid grid-cols-[minmax(0,1.8fr)_minmax(270px,1fr)] gap-4 max-[1000px]:grid-cols-[minmax(0,1.5fr)_minmax(230px,1fr)] max-[720px]:grid-cols-1">
-              <ResourceChart data={chartData} demoMode={demoMode} />
-              <AlertPanel alerts={alerts} demoMode={demoMode} />
+              <ResourceChart data={chartData} />
+              <AlertPanel alerts={alerts} />
             </section>
 
-            {!demoMode && data.processes.length === 0 && (
+            {data.processes.length === 0 && (
               <EmptyState
                 title="No process samples"
                 message="No process data is available for this system yet."
                 icon="⚙"
               />
             )}
-            {demoMode || data.processes.length > 0 && (
-              <ProcessTable processes={processes} demoMode={demoMode} />
+            {data.processes.length > 0 && (
+              <ProcessTable processes={processes} />
             )}
           </>
         )}
 
         <footer className="flex justify-between gap-3 px-0.5 text-[10px] text-[#738199] max-[520px]:flex-col">
           ParindeOS Dashboard
-          <span className="text-[#5f6e85]">{demoMode ? "Demo interface · Not connected to live metrics" : "Supabase · Access enforced with Row Level Security"}</span>
+          <span className="text-[#5f6e85]">{hasData ? "Supabase · Access enforced with Row Level Security" : "Not connected to Supabase"}</span>
         </footer>
       </section>
     </main>

@@ -5,14 +5,14 @@ function Alert({ type, symbol, title, message, time, status }) {
   </div>;
 }
 
-export default function AlertPanel({ alerts, demoMode }) {
+export default function AlertPanel({ alerts }) {
   return <article className="panel p-5 max-[720px]:p-4" id="alerts">
-    <div className="flex items-center justify-between"><div><p className="eyebrow !mb-1.5">NOTIFICATIONS</p><h2 className="section-title">Recent alerts</h2></div><div className="flex items-center gap-2"><span className="grid size-[25px] place-items-center rounded-lg bg-[#342b1d] text-xs text-[#efc56f]">{alerts.length}</span><span className="demo-chip">{demoMode ? "DEMO DATA" : "LIVE DATA"}</span></div></div>
+    <div className="flex items-center justify-between"><div><p className="eyebrow !mb-1.5">NOTIFICATIONS</p><h2 className="section-title">Recent alerts</h2></div><div className="flex items-center gap-2"><span className="grid size-[25px] place-items-center rounded-lg bg-[#342b1d] text-xs text-[#efc56f]">{alerts.length}</span></div></div>
     {alerts.length ? alerts.map(alert => {
       const type = alert.severity === "critical" || alert.severity === "warning" ? "warning" : "success";
-      const time = alert.triggered_at ? new Date(alert.triggered_at).toLocaleString() : "Demo alert";
+      const time = alert.triggered_at ? new Date(alert.triggered_at).toLocaleString() : "Recent alert";
       return <Alert key={alert.id} type={type} symbol={type === "warning" ? "!" : "✓"} title={alert.alert_type.replaceAll("_", " ")} message={alert.message} time={time} status={alert.status} />;
     }) : <p className="mt-4 rounded-lg bg-[#182337] p-4 text-xs text-[#8190a9]">No recent alerts for this system.</p>}
-    <p className="mt-3.5 text-[10px] text-[#77869e]">{demoMode ? "Sample alerts only · No live alerts connected" : "Updates from Supabase"}</p>
+    <p className="mt-3.5 text-[10px] text-[#77869e]">Updates from Supabase</p>
   </article>;
 }
