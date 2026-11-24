@@ -1,0 +1,20 @@
+// Supabase client — browser-safe.
+// Only the publishable/anon key is used here. Service-role keys never ship to the browser.
+
+import { createClient } from "@supabase/supabase-js";
+
+const url = import.meta.env.VITE_SUPABASE_URL?.trim();
+const publishableKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY?.trim();
+
+export const supabaseConfigError = Boolean(url) !== Boolean(publishableKey);
+export const supabaseConfigured = Boolean(url && publishableKey);
+
+export const supabase = supabaseConfigured
+  ? createClient(url, publishableKey, {
+      auth: {
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: true,
+      },
+    })
+  : null;
