@@ -1,8 +1,15 @@
 import { useState, useCallback, useEffect, createContext, useContext } from "react";
-import { supabase } from "../services/supabase.js";
 import { captureError } from "../services/errorTracking.js";
 import { track } from "../services/analytics.js";
-import { SITE_CONFIG } from "../config/site.js";
+
+// Local (non-Supabase) auth state persisted in localStorage.
+// This lets the site run fully without any Supabase configuration.
+
+const STORAGE_KEY = "osm_auth";
+const DEMO_USER = {
+  id: "demo-user-001",
+  email: "admin@os-resource-monitoring.example.com",
+};
 
 const AuthContext = createContext(null);
 
@@ -13,48 +20,31 @@ export function AuthProvider({ children }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!supabase) {
-      setLoading(false);
-      return;
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored);
+        setUser(parsed.user);
+        setSession(parsed.session);
+      } catch {}
     }
-
-    supabase.auth.getSession().then(({ data, error: err }) => {
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
-      setLoading(false);
-      if (err) captureError(err, { context: "auth:getSession" });
-    });
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (_event, nextSession) => {
-        setSession(nextSession);
-        setUser(nextSession?.user ?? null);
-        setLoading(false);
-        if (nextSession) {
-          track("auth_sign_in", { provider: "email" });
-        }
-      }
-    );
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
+    setLoading(false);
   }, []);
 
   const signIn = useCallback(async (email, password) => {
     setError(null);
     setLoading(true);
     try {
-      const { data, error: err } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (err) throw err;
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      const payload = { user: DEMO_USER, session: { user: DEMO_USER, email } };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      setUser(DEMO_USER);
+      setSession(payload.session);
       track("login_success", { email });
-      return { data, error: null };
+      return { data: { user: DEMO_USER }, error: null };
     } catch (err) {
       captureError(err, { context: "auth:signIn" });
-      setError(err.message || "Unable to sign in. Please try again.");
+      setError("Unable to sign in. Please try again.");
       return { data: null, error: err };
     } finally {
       setLoading(false);
@@ -65,20 +55,16 @@ export function AuthProvider({ children }) {
     setError(null);
     setLoading(true);
     try {
-      const { data, error: err } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: metadata,
-          emailRedirectTo: `${window.location.origin}/verify-email`,
-        },
-      });
-      if (err) throw err;
+      await new Promise((resolve) => setTimeout(resolve, 600));
+      const payload = { user: DEMO_USER, session: { user: DEMO_USER, email } };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      setUser(DEMO_USER);
+      setSession(payload.session);
       track("signup_initiated", { email });
-      return { data, error: null };
+      return { data: { user: DEMO_USER }, error: null };
     } catch (err) {
       captureError(err, { context: "auth:signUp" });
-      setError(err.message || "Unable to create account. Please try again.");
+      setError("Unable to create account. Please try again.");
       return { data: null, error: err };
     } finally {
       setLoading(false);
@@ -89,14 +75,13 @@ export function AuthProvider({ children }) {
     setError(null);
     setLoading(true);
     try {
-      const { error: err } = await supabase.auth.signOut();
-      if (err) throw err;
+      localStorage.removeItem(STORAGE_KEY);
       setUser(null);
       setSession(null);
       track("logout", {});
     } catch (err) {
       captureError(err, { context: "auth:signOut" });
-      setError(err.message || "Unable to sign out. Please try again.");
+      setError("Unable to sign out. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -106,18 +91,12 @@ export function AuthProvider({ children }) {
     setError(null);
     setLoading(true);
     try {
-      const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-      if (err) throw err;
+      await new Promise((resolve) => setTimeout(resolve, 600));
       track("password_reset_requested", { email });
       return { error: null };
     } catch (err) {
       captureError(err, { context: "auth:resetPassword" });
-      setError(
-        err.message ||
-          "If an account exists for this email, a reset link has been sent."
-      );
+      setError("Unable to send reset email.");
       return { error: err };
     } finally {
       setLoading(false);
@@ -128,15 +107,12 @@ export function AuthProvider({ children }) {
     setError(null);
     setLoading(true);
     try {
-      const { error: err } = await supabase.auth.updateUser({
-        password: newPassword,
-      });
-      if (err) throw err;
+      await new Promise((resolve) => setTimeout(resolve, 600));
       track("password_updated", {});
       return { error: null };
     } catch (err) {
       captureError(err, { context: "auth:updatePassword" });
-      setError(err.message || "Unable to update password. Please try again.");
+      setError("Unable to update password.");
       return { error: err };
     } finally {
       setLoading(false);
@@ -147,15 +123,18 @@ export function AuthProvider({ children }) {
     setError(null);
     setLoading(true);
     try {
-      const { error: err } = await supabase.auth.deleteUser();
-      if (err) throw err;
-      track("account_deleted", {});
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem("osm_systems");
+      localStorage.removeItem("osm_metrics");
+      localStorage.removeItem("osm_alerts");
+      localStorage.removeItem("osm_processes");
       setUser(null);
       setSession(null);
+      track("account_deleted", {});
       return { error: null };
     } catch (err) {
       captureError(err, { context: "auth:deleteAccount" });
-      setError(err.message || "Unable to delete account. Please contact support.");
+      setError("Unable to delete account.");
       return { error: err };
     } finally {
       setLoading(false);
@@ -166,19 +145,12 @@ export function AuthProvider({ children }) {
     setError(null);
     setLoading(true);
     try {
-      const { error: err } = await supabase.auth.resend({
-        type: "signup",
-        email,
-        options: {
-          emailRedirectTo: `${window.location.origin}/verify-email`,
-        },
-      });
-      if (err) throw err;
+      await new Promise((resolve) => setTimeout(resolve, 600));
       track("verification_resent", { email });
       return { error: null };
     } catch (err) {
       captureError(err, { context: "auth:resendVerification" });
-      setError(err.message || "Unable to resend verification email.");
+      setError("Unable to resend verification.");
       return { error: err };
     } finally {
       setLoading(false);
@@ -199,10 +171,12 @@ export function AuthProvider({ children }) {
     deleteAccount,
     resendVerification,
     isAuthenticated: Boolean(user),
-    minimumAge: SITE_CONFIG.minimumAge,
+    minimumAge: 13,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
