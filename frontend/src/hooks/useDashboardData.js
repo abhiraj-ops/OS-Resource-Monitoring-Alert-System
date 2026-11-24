@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { captureError } from "../services/errorTracking.js";
 import { track } from "../services/analytics.js";
 
@@ -10,14 +10,26 @@ export function useDashboardData(supabase, userId) {
     alerts: [],
     processes: [],
   });
-  const [loadingSystems, setLoadingSystems] = useState(true);
+  const [loadingSystems, setLoadingSystems] = useState(false);
   const [loadingSnapshot, setLoadingSnapshot] = useState(false);
-  const [error, setError] = useState("");
-  const [realtimeStatus, setRealtimeStatus] = useState("connecting");
+  const [error, setError] = useState(null);
+  const [realtimeStatus, setRealtimeStatus] = useState("offline");
+
+  useEffect(() => {
+    if (!supabase || !userId) {
+      setLoadingSystems(false);
+      setRealtimeStatus("offline");
+      return;
+    }
+  }, [supabase, userId]);
 
   const loadSystems = useCallback(async () => {
-    if (!supabase || !userId) return;
+    if (!supabase || !userId) {
+      setLoadingSystems(false);
+      return;
+    }
     setLoadingSystems(true);
+    setError(null);
     try {
       const { data, error: queryError } = await supabase
         .from("systems")
@@ -28,7 +40,6 @@ export function useDashboardData(supabase, userId) {
         .order("last_seen_at", { ascending: false, nullsFirst: false });
 
       if (queryError) throw queryError;
-      setError("");
       setSystems(data ?? []);
       if (!data?.length) {
         setSnapshot({ metrics: [], alerts: [], processes: [] });
@@ -39,17 +50,23 @@ export function useDashboardData(supabase, userId) {
           ? current
           : data?.[0]?.id ?? ""
       );
+      setRealtimeStatus("online");
     } catch (err) {
       captureError(err, { context: "dashboard:loadSystems" });
       setError(err.message || "Unable to load systems.");
+      setRealtimeStatus("offline");
     } finally {
       setLoadingSystems(false);
     }
   }, [supabase, userId]);
 
   const refreshSnapshot = useCallback(async () => {
-    if (!supabase || !selectedSystemId) return;
+    if (!supabase || !selectedSystemId) {
+      setLoadingSnapshot(false);
+      return;
+    }
     setLoadingSnapshot(true);
+    setError(null);
     try {
       const [metricsResult, alertsResult, processesResult] =
         await Promise.all([
@@ -84,16 +101,17 @@ export function useDashboardData(supabase, userId) {
       );
       if (failed) throw failed.error;
 
-      setError("");
       setSnapshot({
         metrics: metricsResult.data ?? [],
         alerts: alertsResult.data ?? [],
         processes: processesResult.data ?? [],
       });
       track("dashboard_data_refreshed", { systemId: selectedSystemId });
+      setRealtimeStatus("online");
     } catch (err) {
       captureError(err, { context: "dashboard:refreshSnapshot" });
       setError(err.message || "Unable to load dashboard data.");
+      setRealtimeStatus("offline");
     } finally {
       setLoadingSnapshot(false);
     }

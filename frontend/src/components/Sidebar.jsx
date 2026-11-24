@@ -20,9 +20,6 @@ export default function Sidebar() {
       <h2 className="mx-2 text-[21px] font-bold tracking-tight max-[720px]:mx-0 max-[720px]:text-lg">
         <span className="mr-2 text-[#67e4bd]">◈</span>ParindeOS
       </h2>
-      <p className="my-[34px] mx-[10px] text-[11px] font-bold tracking-[1.2px] text-[#f1c875] max-[720px]:hidden">
-        <span className="status-dot amber" />DEMO MODE
-      </p>
       <nav aria-label="Main navigation" className="grid gap-1.5 max-[720px]:mt-3 max-[720px]:flex max-[720px]:gap-1.5 max-[720px]:overflow-x-auto">
         {items.map((item, i) => (
           <Link
@@ -36,7 +33,7 @@ export default function Sidebar() {
       </nav>
       <div className="mt-auto border-t border-[#202c40] px-2 pt-4 text-[11px] leading-7 text-[#77869f] max-[720px]:hidden">
         ParindeOS Monitor<br />
-        Version 1.0 · Preview
+        Version 1.0
       </div>
     </aside>
   );
