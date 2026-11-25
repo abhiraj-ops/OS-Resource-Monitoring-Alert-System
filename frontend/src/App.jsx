@@ -1,13 +1,5 @@
-import { AuthProvider } from "./hooks/useAuth.jsx";
-import { ErrorTrackingProvider } from "./hooks/useErrorTracking.jsx";
-import { ErrorBoundary } from "./components/ErrorBoundary.jsx";
+import router from "./routes.jsx";
 
 export default function App() {
-  return (
-    <AuthProvider>
-      <ErrorTrackingProvider>
-        <ErrorBoundary />
-      </ErrorTrackingProvider>
-    </AuthProvider>
-  );
+  return router;
 }
