@@ -10,7 +10,7 @@ import LoadingSpinner from "../components/LoadingSpinner.jsx";
 import ErrorMessage from "../components/ErrorMessage.jsx";
 import useDashboardData from "../hooks/useDashboardData.js";
 import { AnnounceToScreenReader } from "../components/AnnounceToScreenReader.jsx";
-import { Download, MoreHorizontal } from "lucide-react";
+import { Download, Search, MoreHorizontal } from "lucide-react";
 import { useTheme } from "../hooks/useTheme.jsx";
 
 const demoMetrics = [
