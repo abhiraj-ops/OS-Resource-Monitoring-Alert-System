@@ -7,6 +7,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import Processes from "./pages/Processes.jsx";
 import Analytics from "./pages/Analytics.jsx";
 import Alerts from "./pages/Alerts.jsx";
+import Team from "./pages/Team.jsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy.jsx";
 import TermsOfService from "./pages/TermsOfService.jsx";
 import RefundPolicy from "./pages/RefundPolicy.jsx";
@@ -28,6 +29,7 @@ const router = createBrowserRouter([
   { path: "/processes", element: <Processes supabase={supabase} session={null} /> },
   { path: "/analytics", element: <Analytics supabase={supabase} session={null} /> },
   { path: "/alerts", element: <Alerts supabase={supabase} session={null} /> },
+  { path: "/team", element: <Team /> },
   { path: "/settings", element: <Settings supabase={supabase} /> },
   { path: "/onboarding", element: <Onboarding /> },
   { path: "/privacy", element: <PrivacyPolicy /> },

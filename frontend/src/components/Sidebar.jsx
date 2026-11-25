@@ -5,6 +5,7 @@ const items = [
   { label: "Processes", path: "/processes", icon: "⚙" },
   { label: "Analytics", path: "/analytics", icon: "📊" },
   { label: "Alerts", path: "/alerts", icon: "🚨" },
+  { label: "Team", path: "/team", icon: "👥" },
   { label: "Settings", path: "/settings", icon: "🔧" },
   { label: "Privacy Policy", path: "/privacy", icon: "🔒" },
   { label: "Terms of Service", path: "/terms", icon: "📄" },
