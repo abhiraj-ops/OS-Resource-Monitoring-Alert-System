@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import ProcessTable from "../components/ProcessTable.jsx";
 import EmptyState from "../components/EmptyState.jsx";
 import LoadingSpinner from "../components/LoadingSpinner.jsx";
@@ -27,7 +27,7 @@ export default function Processes({ supabase = null, session = null }) {
   const [isEditing, setIsEditing] = useState({});
   const [saveMessage, setSaveMessage] = useState(null);
 
-  useState(() => {
+  useEffect(() => {
     localStorage.setItem("os_processes", JSON.stringify(processes));
   }, [processes]);
 
