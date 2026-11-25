@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { Menu, LogOut, Globe, ShieldCheck } from "lucide-react";
 import { useTheme } from "../hooks/useTheme.jsx";
