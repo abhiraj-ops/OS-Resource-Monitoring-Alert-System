@@ -4,13 +4,17 @@ import { useAuth } from "../hooks/useAuth.jsx";
 import { DataDeletionRequest } from "../components/DataDeletionRequest.jsx";
 import { BusinessDetails } from "../components/BusinessDetails.jsx";
 import { AgeConsent } from "../components/AgeConsent.jsx";
-import { ShieldCheck, User, Trash2, Mail, Lock, AlertCircle, ArrowRight } from "lucide-react";
+import { ShieldCheck, User, Trash2, Mail, Lock, AlertCircle, ArrowRight, Bell, Palette, LogOut } from "lucide-react";
+import { useTheme } from "../hooks/useTheme.jsx";
 
 export default function Settings({ supabase, openDelete = false }) {
   const navigate = useNavigate();
   const { user, session, signOut, deleteAccount, loading, error, setError } = useAuth();
+  const { theme, setTheme, themes, themeInfo } = useTheme();
   const [showDeletion, setShowDeletion] = useState(openDelete);
   const [ageConfirmed, setAgeConfirmed] = useState(false);
+  const [emailNotifications, setEmailNotifications] = useState(true);
+  const [pushNotifications, setPushNotifications] = useState(true);
 
   const handleSignOut = async () => {
     setError(null);
@@ -19,14 +23,14 @@ export default function Settings({ supabase, openDelete = false }) {
   };
 
   return (
-    <main className="min-h-screen bg-[#090e19] px-4 py-8 text-[#edf2fb]">
+    <main className="min-h-screen bg-[#0a0f1d] px-4 py-8 text-[#edf2fb]">
       <section className="max-w-2xl mx-auto">
         <nav className="mb-6 flex items-center gap-2">
-          <ArrowLeft className="w-4 h-4 text-[#65e6bd]" />
           <a
             href="/dashboard"
-            className="text-sm text-[#65e6bd] underline underline-offset-4 hover:text-[#7ee4c4]"
+            className="flex items-center gap-2 text-sm text-[#65e6bd] underline underline-offset-4 hover:text-[#7ee4c4]"
           >
+            <ArrowRight className="w-4 h-4" style={{ transform: "rotate(180deg)" }} />
             Back to dashboard
           </a>
         </nav>
@@ -37,10 +41,11 @@ export default function Settings({ supabase, openDelete = false }) {
           <AgeConsent onConfirm={setAgeConfirmed} />
         )}
 
-        <section className="panel p-6 mb-6">
+        {/* Account */}
+        <section className="panel p-6 mb-6 rounded-xl border" style={ { borderColor: "var(--border)", background: "var(--panel)" } }>
           <h2 className="text-lg font-bold mb-4">Account</h2>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 rounded-lg border border-[#25334b] bg-[#0c1422]">
+            <div className="flex items-center justify-between p-4 rounded-lg border" style={ { borderColor: "var(--border)", background: "var(--panel-inner)" } }>
               <div className="flex items-center gap-3">
                 <User className="w-5 h-5 text-[#65e6bd]" />
                 <div>
@@ -53,12 +58,13 @@ export default function Settings({ supabase, openDelete = false }) {
                 disabled={loading}
                 className="rounded-lg border border-[#30405b] px-3 py-2 text-sm text-[#c1ccdc] hover:bg-[#182337] disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-[#65e6bd]"
               >
+                <LogOut className="w-4 h-4 mr-2" />
                 {loading ? "Signing out…" : "Sign out"}
               </button>
             </div>
 
             {session && (
-              <div className="flex items-center justify-between p-4 rounded-lg border border-[#25334b] bg-[#0c1422]">
+              <div className="flex items-center justify-between p-4 rounded-lg border" style={ { borderColor: "var(--border)", background: "var(--panel-inner)" } }>
                 <div className="flex items-center gap-3">
                   <ShieldCheck className="w-5 h-5 text-[#65e6bd]" />
                   <div>
@@ -72,8 +78,76 @@ export default function Settings({ supabase, openDelete = false }) {
           </div>
         </section>
 
-        <section className="panel p-6 mb-6">
-          <h2 className="text-lg font-bold mb-4">Data &amp; privacy</h2>
+        {/* Appearance */}
+        <section className="panel p-6 mb-6 rounded-xl border" style={ { borderColor: "var(--border)", background: "var(--panel)" } }>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold">Appearance</h2>
+            <Palette className="w-5 h-5 text-[#65e6bd]" />
+          </div>
+          <p className="text-xs text-[#8190a9] mb-4">Choose your preferred theme. Changes apply immediately.</p>
+          <div className="grid gap-2 md:grid-cols-4">
+            {themes.map((t) => (
+              <button
+                key={t}
+                onClick={() => setTheme(t)}
+                className={`flex flex-col items-center gap-2 p-3 rounded-lg border transition ${
+                  theme === t
+                    ? "bg-[#10b981]/10 border-[#10b981]/40"
+                    : "border-[#30405b] hover:border-[#65e6bd] hover:bg-[#182337]"
+                }`}
+              >
+                <div className="h-10 w-10 rounded-lg flex items-center justify-center shrink-0" style={ { background: `linear-gradient(135deg, ${["#0a0f1d", "#060b16", "#eef4fb", "#050607"][themes.indexOf(t)]} 0%, ${["#0284c7", "#10b981", "#0369a1", "#525252"][themes.indexOf(t)]} 55%, ${["#38bdf8", "#8b5cf6", "#93c5fd", "#fafafa"][themes.indexOf(t)]} 100%)`, borderColor: "var(--border-strong)" } } />
+                <span className="text-xs font-semibold" style={ { color: "var(--text)" } }>{themeInfo[t].label}</span>
+                <span className="text-[10px]" style={ { color: "var(--text-subtle)" } }>{themeInfo[t].hint}</span>
+                {theme === t && <Check className="h-3 w-3 text-[#10b981]" />}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Notifications */}
+        <section className="panel p-6 mb-6 rounded-xl border" style={ { borderColor: "var(--border)", background: "var(--panel)" } }>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold">Notifications</h2>
+            <Bell className="w-5 h-5 text-[#65e6bd]" />
+          </div>
+          <div className="space-y-3">
+            <label className="flex items-center justify-between p-3 rounded-lg border cursor-pointer" style={ { borderColor: "var(--border)", background: "var(--panel-inner)" } }>
+              <span className="flex items-center gap-3">
+                <Bell className="w-4 h-4 text-[#65e6bd]" />
+                <div>
+                  <p className="font-semibold">Email notifications</p>
+                  <p className="text-xs text-[#8190a9]">Receive alert emails for critical events</p>
+                </div>
+              </span>
+              <input
+                type="checkbox"
+                checked={emailNotifications}
+                onChange={(e) => setEmailNotifications(e.target.checked)}
+                className="rounded border-[#30405b] bg-[#0c1422] text-[#10b981] focus:ring-[#10b981]"
+              />
+            </label>
+            <label className="flex items-center justify-between p-3 rounded-lg border cursor-pointer" style={ { borderColor: "var(--border)", background: "var(--panel-inner)" } }>
+              <span className="flex items-center gap-3">
+                <Bell className="w-4 h-4 text-[#65e6bd]" />
+                <div>
+                  <p className="font-semibold">Push notifications</p>
+                  <p className="text-xs text-[#8190a9]">Browser push notifications for alerts</p>
+                </div>
+              </span>
+              <input
+                type="checkbox"
+                checked={pushNotifications}
+                onChange={(e) => setPushNotifications(e.target.checked)}
+                className="rounded border-[#30405b] bg-[#0c1422] text-[#10b981] focus:ring-[#10b981]"
+              />
+            </label>
+          </div>
+        </section>
+
+        {/* Data & Privacy */}
+        <section className="panel p-6 mb-6 rounded-xl border" style={ { borderColor: "var(--border)", background: "var(--panel)" } }>
+          <h2 className="text-lg font-bold mb-4">Data &amp; Privacy</h2>
           <div className="space-y-4">
             <button
               onClick={() => setShowDeletion(true)}
@@ -82,7 +156,7 @@ export default function Settings({ supabase, openDelete = false }) {
               <div className="flex items-center gap-3">
                 <Trash2 className="w-5 h-5 text-[#f2bf60]" />
                 <div>
-                  <p className="font-semibold text-red-200">Delete my account & data</p>
+                  <p className="font-semibold text-red-200">Delete my account &amp; data</p>
                   <p className="text-xs text-[#fca5a5]">
                     Permanently erase your personal data under GDPR/CCPA
                   </p>
@@ -126,7 +200,7 @@ export default function Settings({ supabase, openDelete = false }) {
   );
 }
 
-function ArrowLeft({ className }) {
+function Check({ className }) {
   return (
     <svg
       className={className}
@@ -135,7 +209,7 @@ function ArrowLeft({ className }) {
       viewBox="0 0 24 24"
       stroke="currentColor"
     >
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
     </svg>
   );
 }
