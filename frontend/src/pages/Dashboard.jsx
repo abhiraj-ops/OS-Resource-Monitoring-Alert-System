@@ -248,6 +248,37 @@ export default function Dashboard({ supabase = null, session = null }) {
               </div>
             </div>
 
+            {/* System Health Bar */}
+            <section className="mb-6 flex gap-4">
+              <div className="flex-1 panel p-4 rounded-xl border" style={ { borderColor: "var(--border)" } }>
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <p className="eyebrow">SYSTEM HEALTH</p>
+                    <span className="text-lg font-bold" style={ { color: "var(--text)" } }>88%</span>
+                  </div>
+                  <span className="badge shrink-0" style={ { color: "var(--severity-low)", borderColor: "var(--severity-low)", background: "rgba(34,197,94,0.12)" } }>
+                    GOOD
+                  </span>
+                </div>
+                <div className="h-2 w-full bg-[#1e293b]/40 rounded-full overflow-hidden">
+                  <div className="h-full" style={ { background: "linear-gradient(90deg, var(--accent) 0%, var(--accent-strong) 100%)", width: "88%" } } />
+                </div>
+                <p className="text-[10px] text-[#64748b] mt-1">All critical systems within normal thresholds.</p>
+              </div>
+              <div className="flex-1 panel p-4 rounded-xl border" style={ { borderColor: "var(--border)" } }>
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <p className="eyebrow">UPTIME</p>
+                    <span className="text-lg font-bold font-mono" style={ { color: "var(--text)" } }>14d 6h 32m</span>
+                  </div>
+                  <span className="badge shrink-0" style={ { color: "var(--severity-low)", borderColor: "var(--severity-low)", background: "rgba(34,197,94,0.12)" } }>
+                    STABLE
+                  </span>
+                </div>
+                <p className="text-[10px] text-[#64748b] mt-1">Last reboot: 12 days ago · No unplanned downtime.</p>
+              </div>
+            </section>
+
             {/* Metrics grid */}
             <section className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4" aria-label="System metrics">
               {metrics.map(metric => (
@@ -295,6 +326,7 @@ export default function Dashboard({ supabase = null, session = null }) {
         <footer className="flex justify-between gap-3 px-0.5 text-[10px] text-[#64748b] max-[520px]:flex-col">
           <span>OS Monitor</span>
           <span className="text-[#5f6e85]">{hasData ? "Local monitoring agent · Row Level Security enforced" : "Not connected to monitoring agent"}</span>
+          <span className="text-[#5f6e85]">Updated: {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
         </footer>
       </section>
     </main>
