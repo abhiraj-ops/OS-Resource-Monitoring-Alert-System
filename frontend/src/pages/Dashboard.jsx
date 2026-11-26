@@ -138,6 +138,18 @@ export default function Dashboard({ supabase = null, session = null }) {
     URL.revokeObjectURL(url);
   }
 
+  const handleProcessesChange = useCallback((next) => {
+    setProcesses(next);
+    // Persist to localStorage so the edit survives refresh
+    try {
+      const key = `osm_processes`;
+      const existing = localStorage.getItem(key);
+      const map = existing ? JSON.parse(existing) : {};
+      map[data.selectedSystemId] = next;
+      localStorage.setItem(key, JSON.stringify(map));
+    } catch {}
+  }, [data.selectedSystemId]);
+
   return (
     <main className="flex min-h-screen max-[720px]:block">
       <AnnounceToScreenReader announcement={data.error || (data.loading ? "Loading data…" : null)} />
@@ -274,17 +286,7 @@ export default function Dashboard({ supabase = null, session = null }) {
               <ProcessTable
                 processes={processes}
                 readOnly={false}
-                onProcessesChange={useCallback((next) => {
-                  setProcesses(next);
-                  // Persist to localStorage so the edit survives refresh
-                  try {
-                    const key = `osm_processes`;
-                    const existing = localStorage.getItem(key);
-                    const map = existing ? JSON.parse(existing) : {};
-                    map[data.selectedSystemId] = next;
-                    localStorage.setItem(key, JSON.stringify(map));
-                  } catch {}
-                }, [data.selectedSystemId])}
+                onProcessesChange={handleProcessesChange}
               />
             )}
           </>
