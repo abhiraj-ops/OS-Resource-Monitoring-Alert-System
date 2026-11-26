@@ -1,6 +1,7 @@
 [build]
   command = "npm run build"
   publish = "dist"
+  base = "frontend"
 
 [build.environment]
   NODE_VERSION = "20"
@@ -8,4 +9,10 @@
 [[redirects]]
   from = "/*"
   to = "/index.html"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "https://*"
+  to = "https://:scheme://:path/:splat"
   status = 200
