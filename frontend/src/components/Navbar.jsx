@@ -16,7 +16,7 @@ export default function Navbar({ userEmail, realtimeStatus, onSignOut }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const navigate = useNavigate();
-  const { theme, cycleTheme, themeInfo } = useTheme();
+  const { theme, cycleTheme, setThemeValue, themeInfo } = useTheme();
   const live = realtimeStatus === "online";
 
   useEffect(() => {
