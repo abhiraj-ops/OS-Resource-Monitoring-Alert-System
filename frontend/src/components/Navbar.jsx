@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Menu, LogOut, Globe, ShieldCheck } from "lucide-react";
+import { Menu, LogOut, Globe, ShieldCheck, X } from "lucide-react";
 import { useTheme } from "../hooks/useTheme.jsx";
 import MobileNav from "./MobileNav.jsx";
 
@@ -109,7 +109,7 @@ export default function Navbar({ userEmail, realtimeStatus, onSignOut }) {
               <span className="h-1.5 w-1.5 rounded-full" style={ { background: statusConfig.color } } />
               {statusConfig.label}
             </span>
-            <ThemeToggle theme={theme} cycleTheme={cycleTheme} />
+            <ThemeToggle theme={theme} cycleTheme={cycleTheme} setThemeValue={setThemeValue} />
             <a
               href="/dashboard"
               className="btn btn-primary hidden !py-2 sm:inline-flex"
@@ -124,7 +124,7 @@ export default function Navbar({ userEmail, realtimeStatus, onSignOut }) {
               aria-label={mobileOpen ? "Close menu" : "Open menu"}
               onClick={() => setMobileOpen((v) => !v)}
             >
-              {mobileOpen ? <xe className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
@@ -166,21 +166,7 @@ export default function Navbar({ userEmail, realtimeStatus, onSignOut }) {
   );
 }
 
-function xe({ className }) {
-  return (
-    <svg
-      className={className}
-      aria-hidden="true"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-    </svg>
-  );
-}
-
-function ThemeToggle({ theme, cycleTheme }) {
+function ThemeToggle({ theme, cycleTheme, setThemeValue }) {
   const info = themeInfo[theme];
   const [open, setOpen] = useState(false);
   const [hoverIdx, setHoverIdx] = useState(0);
@@ -219,7 +205,7 @@ function ThemeToggle({ theme, cycleTheme }) {
               aria-checked={theme === t}
               tabIndex={i === hoverIdx ? 0 : -1}
               onClick={() => {
-                cycleTheme();
+                setThemeValue(t);
                 setOpen(false);
               }}
               onMouseEnter={() => setHoverIdx(i)}

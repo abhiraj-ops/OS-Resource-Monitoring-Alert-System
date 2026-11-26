@@ -1,4 +1,4 @@
-export default function MetricCard({ name, value, detail, status = "normal" }) {
+export default function MetricCard({ name, value, detail, status = "normal", icon }) {
   const statusColors = {
     normal: "text-[#69e6c0]",
     warning: "text-[#f59e0b]",
@@ -16,7 +16,7 @@ export default function MetricCard({ name, value, detail, status = "normal" }) {
               className="h-7 w-7 shrink-0 rounded-lg bg-[#1b3040] flex items-center justify-center"
               style={ { color: "var(--accent)" } }
             >
-              {name.slice(0, 1)}
+              {icon ?? name.slice(0, 1)}
             </span>
             <span className="text-xs font-semibold">{name}</span>
           </div>

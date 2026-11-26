@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Sidebar from "../components/Sidebar.jsx";
 import Navbar from "../components/Navbar.jsx";
 import MetricCard from "../components/MetricCard.jsx";
@@ -91,11 +91,17 @@ function chartPoints(metrics) {
 export default function Dashboard({ supabase = null, session = null }) {
   const data = useDashboardData(supabase, session?.user?.id);
   const { theme, cycleTheme } = useTheme();
+  const { liveEnabled, toggleLive } = data;
   const metrics = buildMetrics(data.metrics);
-  const processes = latestProcesses(data.processes);
+  const [processes, setProcesses] = useState(() => latestProcesses(data.processes));
   const alerts = data.alerts;
   const chartData = chartPoints(data.metrics);
   const selectedSystem = data.systems.find(system => system.id === data.selectedSystemId);
+
+  // Re-sync local process state when the system or underlying data changes
+  useEffect(() => {
+    setProcesses(latestProcesses(data.processes));
+  }, [data.processes, data.selectedSystemId]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [severityFilter, setSeverityFilter] = useState("all");
@@ -206,6 +212,15 @@ export default function Dashboard({ supabase = null, session = null }) {
               </div>
               <div className="ml-auto flex items-center gap-2">
                 <button
+                  onClick={toggleLive}
+                  className={`btn btn-ghost flex items-center gap-2 ${liveEnabled ? "bg-[#10b981]/20 text-[#10b981] border-[#10b981]/40" : ""}`}
+                  title={liveEnabled ? "Stop live simulation" : "Start live simulation"}
+                  aria-pressed={liveEnabled}
+                >
+                  <span className={`h-2.5 w-2.5 rounded-full ${liveEnabled ? "bg-[#10b981] animate-pulse" : "bg-[#334155]"}`} aria-hidden="true" />
+                  {liveEnabled ? "Live: ON" : "Live: OFF"}
+                </button>
+                <button
                   onClick={exportCSV}
                   className="btn btn-ghost"
                   title="Export CSV report"
@@ -240,10 +255,37 @@ export default function Dashboard({ supabase = null, session = null }) {
                 title="No process samples"
                 message="No process data is available for this system yet."
                 icon="⚙"
+                actionLabel="Add Process"
+                action={() => setProcesses((prev) => [
+                  ...prev,
+                  {
+                    id: `p-${Date.now()}`,
+                    process_name: "new-process",
+                    pid: prev.length + 1,
+                    cpu_percent: 0,
+                    memory_bytes: 0,
+                    username: "demo-user",
+                    captured_at: new Date().toISOString(),
+                  },
+                ])}
               />
             )}
             {data.processes.length > 0 && (
-              <ProcessTable processes={processes} />
+              <ProcessTable
+                processes={processes}
+                readOnly={false}
+                onProcessesChange={useCallback((next) => {
+                  setProcesses(next);
+                  // Persist to localStorage so the edit survives refresh
+                  try {
+                    const key = `osm_processes`;
+                    const existing = localStorage.getItem(key);
+                    const map = existing ? JSON.parse(existing) : {};
+                    map[data.selectedSystemId] = next;
+                    localStorage.setItem(key, JSON.stringify(map));
+                  } catch {}
+                }, [data.selectedSystemId])}
+              />
             )}
           </>
         )}

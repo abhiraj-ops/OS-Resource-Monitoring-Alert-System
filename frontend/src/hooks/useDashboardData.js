@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { captureError } from "../services/errorTracking.js";
 import { track } from "../services/analytics.js";
 
@@ -109,6 +109,8 @@ export function useDashboardData(supabase, userId) {
   const [loadingSnapshot, setLoadingSnapshot] = useState(false);
   const [error, setError] = useState(null);
   const [realtimeStatus, setRealtimeStatus] = useState("online");
+  const [liveEnabled, setLiveEnabled] = useState(false);
+  const simulationRef = useRef(null);
 
   // Initialize seed data on first load
   useEffect(() => {
@@ -177,6 +179,64 @@ export function useDashboardData(supabase, userId) {
     refreshSnapshot();
   }, [refreshSnapshot]);
 
+  const generateMetric = useCallback(() => {
+    const last = getLocal(METRICS_KEY, {})[selectedSystemId] ?? [];
+    const prev = last[last.length - 1];
+    const nowTs = new Date().toISOString();
+    const baseCpu = prev ? Number(prev.cpu_percent) : 40;
+    const baseRam = prev ? Number(((prev.memory_used_bytes ?? 0) / (prev.memory_total_bytes ?? 1)) * 100) : 50;
+    const cpu = Math.max(0, Math.min(100, baseCpu + (Math.random() - 0.5) * 12));
+    const ram = Math.max(0, Math.min(100, baseRam + (Math.random() - 0.5) * 8));
+    const metric = {
+      id: `m-${Date.now()}`,
+      system_id: selectedSystemId,
+      cpu_percent: Math.round(cpu * 100) / 100,
+      memory_used_bytes: Math.floor((ram / 100) * 17179869184),
+      memory_total_bytes: 17179869184,
+      disk_used_bytes: 128849018880,
+      disk_total_bytes: 512110190592,
+      network_received_bytes: (prev?.network_received_bytes ?? 1200000) + 50000,
+      network_sent_bytes: (prev?.network_sent_bytes ?? 480000) + 30000,
+      collected_at: nowTs,
+    };
+    const updated = [...last, metric].slice(-60);
+    setLocal(METRICS_KEY, { ...getLocal(METRICS_KEY, {}), [selectedSystemId]: updated });
+    track("live_metric_generated", { systemId: selectedSystemId, cpu, ram });
+    return metric;
+  }, [selectedSystemId]);
+
+  const startSimulation = useCallback(() => {
+    if (simulationRef.current) return;
+    setRealtimeStatus("online");
+    setLiveEnabled(true);
+    simulationRef.current = setInterval(() => {
+      const metric = generateMetric();
+      setSnapshot((prev) => {
+        const updated = [...prev.metrics, metric].slice(-60);
+        return { ...prev, metrics: updated };
+      });
+    }, 3000);
+  }, [generateMetric]);
+
+  const stopSimulation = useCallback(() => {
+    if (simulationRef.current) {
+      clearInterval(simulationRef.current);
+      simulationRef.current = null;
+    }
+    setLiveEnabled(false);
+  }, []);
+
+  const toggleLive = useCallback(() => {
+    if (liveEnabled) stopSimulation();
+    else startSimulation();
+  }, [liveEnabled, startSimulation, stopSimulation]);
+
+  useEffect(() => {
+    return () => {
+      if (simulationRef.current) clearInterval(simulationRef.current);
+    };
+  }, []);
+
   return {
     systems,
     selectedSystemId,
@@ -185,6 +245,10 @@ export function useDashboardData(supabase, userId) {
     loading: loadingSystems || loadingSnapshot,
     error,
     realtimeStatus,
+    liveEnabled,
+    toggleLive,
+    startSimulation,
+    stopSimulation,
     loadSystems,
     refreshSnapshot,
   };
