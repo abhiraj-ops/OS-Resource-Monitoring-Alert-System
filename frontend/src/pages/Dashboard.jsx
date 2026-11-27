@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import Sidebar from "../components/Sidebar.jsx";
 import Navbar from "../components/Navbar.jsx";
 import MetricCard from "../components/MetricCard.jsx";
@@ -91,17 +91,11 @@ function chartPoints(metrics) {
 export default function Dashboard({ supabase = null, session = null }) {
   const data = useDashboardData(supabase, session?.user?.id);
   const { theme, cycleTheme } = useTheme();
-  const { liveEnabled, toggleLive } = data;
   const metrics = buildMetrics(data.metrics);
-  const [processes, setProcesses] = useState(() => latestProcesses(data.processes));
+  const processes = latestProcesses(data.processes);
   const alerts = data.alerts;
   const chartData = chartPoints(data.metrics);
   const selectedSystem = data.systems.find(system => system.id === data.selectedSystemId);
-
-  // Re-sync local process state when the system or underlying data changes
-  useEffect(() => {
-    setProcesses(latestProcesses(data.processes));
-  }, [data.processes, data.selectedSystemId]);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [severityFilter, setSeverityFilter] = useState("all");
@@ -137,18 +131,6 @@ export default function Dashboard({ supabase = null, session = null }) {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   }
-
-  const handleProcessesChange = useCallback((next) => {
-    setProcesses(next);
-    // Persist to localStorage so the edit survives refresh
-    try {
-      const key = `osm_processes`;
-      const existing = localStorage.getItem(key);
-      const map = existing ? JSON.parse(existing) : {};
-      map[data.selectedSystemId] = next;
-      localStorage.setItem(key, JSON.stringify(map));
-    } catch {}
-  }, [data.selectedSystemId]);
 
   return (
     <main className="flex min-h-screen max-[720px]:block">
@@ -224,15 +206,6 @@ export default function Dashboard({ supabase = null, session = null }) {
               </div>
               <div className="ml-auto flex items-center gap-2">
                 <button
-                  onClick={toggleLive}
-                  className={`btn btn-ghost flex items-center gap-2 ${liveEnabled ? "bg-[#10b981]/20 text-[#10b981] border-[#10b981]/40" : ""}`}
-                  title={liveEnabled ? "Stop live simulation" : "Start live simulation"}
-                  aria-pressed={liveEnabled}
-                >
-                  <span className={`h-2.5 w-2.5 rounded-full ${liveEnabled ? "bg-[#10b981] animate-pulse" : "bg-[#334155]"}`} aria-hidden="true" />
-                  {liveEnabled ? "Live: ON" : "Live: OFF"}
-                </button>
-                <button
                   onClick={exportCSV}
                   className="btn btn-ghost"
                   title="Export CSV report"
@@ -247,37 +220,6 @@ export default function Dashboard({ supabase = null, session = null }) {
                 </button>
               </div>
             </div>
-
-            {/* System Health Bar */}
-            <section className="mb-6 flex gap-4">
-              <div className="flex-1 panel p-4 rounded-xl border" style={ { borderColor: "var(--border)" } }>
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <p className="eyebrow">SYSTEM HEALTH</p>
-                    <span className="text-lg font-bold" style={ { color: "var(--text)" } }>88%</span>
-                  </div>
-                  <span className="badge shrink-0" style={ { color: "var(--severity-low)", borderColor: "var(--severity-low)", background: "rgba(34,197,94,0.12)" } }>
-                    GOOD
-                  </span>
-                </div>
-                <div className="h-2 w-full bg-[#1e293b]/40 rounded-full overflow-hidden">
-                  <div className="h-full" style={ { background: "linear-gradient(90deg, var(--accent) 0%, var(--accent-strong) 100%)", width: "88%" } } />
-                </div>
-                <p className="text-[10px] text-[#64748b] mt-1">All critical systems within normal thresholds.</p>
-              </div>
-              <div className="flex-1 panel p-4 rounded-xl border" style={ { borderColor: "var(--border)" } }>
-                <div className="flex items-center justify-between mb-2">
-                  <div>
-                    <p className="eyebrow">UPTIME</p>
-                    <span className="text-lg font-bold font-mono" style={ { color: "var(--text)" } }>14d 6h 32m</span>
-                  </div>
-                  <span className="badge shrink-0" style={ { color: "var(--severity-low)", borderColor: "var(--severity-low)", background: "rgba(34,197,94,0.12)" } }>
-                    STABLE
-                  </span>
-                </div>
-                <p className="text-[10px] text-[#64748b] mt-1">Last reboot: 12 days ago · No unplanned downtime.</p>
-              </div>
-            </section>
 
             {/* Metrics grid */}
             <section className="mb-6 grid grid-cols-2 gap-4 md:grid-cols-4" aria-label="System metrics">
@@ -298,27 +240,10 @@ export default function Dashboard({ supabase = null, session = null }) {
                 title="No process samples"
                 message="No process data is available for this system yet."
                 icon="⚙"
-                actionLabel="Add Process"
-                action={() => setProcesses((prev) => [
-                  ...prev,
-                  {
-                    id: `p-${Date.now()}`,
-                    process_name: "new-process",
-                    pid: prev.length + 1,
-                    cpu_percent: 0,
-                    memory_bytes: 0,
-                    username: "demo-user",
-                    captured_at: new Date().toISOString(),
-                  },
-                ])}
               />
             )}
             {data.processes.length > 0 && (
-              <ProcessTable
-                processes={processes}
-                readOnly={false}
-                onProcessesChange={handleProcessesChange}
-              />
+              <ProcessTable processes={processes} />
             )}
           </>
         )}
@@ -326,7 +251,6 @@ export default function Dashboard({ supabase = null, session = null }) {
         <footer className="flex justify-between gap-3 px-0.5 text-[10px] text-[#64748b] max-[520px]:flex-col">
           <span>OS Monitor</span>
           <span className="text-[#5f6e85]">{hasData ? "Local monitoring agent · Row Level Security enforced" : "Not connected to monitoring agent"}</span>
-          <span className="text-[#5f6e85]">Updated: {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
         </footer>
       </section>
     </main>
