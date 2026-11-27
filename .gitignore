@@ -15,6 +15,9 @@ downloads/
 eggs/
 .eggs/
 lib/
+# Allow form-validation schemas required for the frontend build
+!frontend/src/lib/
+!frontend/src/lib/validators.ts
 lib64/
 parts/
 sdist/
@@ -216,3 +219,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Local Netlify folder
+.netlify
